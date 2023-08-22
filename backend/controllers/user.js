@@ -180,12 +180,12 @@ exports.resetPassword = async (req, res) => {
 
   const user = await User.findById(userId)
   console.log('user', user)
-  // const matched = await user.comparePassword(newPassword)
-  // if (matched)
-  //   return sendError(
-  //     res,
-  //     'The new password must be different from the old one!'
-  //   )
+  const matched = await user.comparePassword(newPassword)
+  if (matched)
+    return sendError(
+      res,
+      'The new password must be different from the old one!'
+    )
 
   user.password = newPassword
   await user.save()
@@ -208,4 +208,57 @@ exports.resetPassword = async (req, res) => {
   res.json({
     message: 'Password reset successfully, now you can use new password.',
   })
+}
+
+exports.getProfileDetails = async (req, res) => {
+  const { userId } = req.params
+
+  const user = await User.findOne(userId)
+  console.log(user)
+
+  const { password, ...rest } = Object.assign({}, user.toJSON())
+
+  return res.status(201).send(rest)
+
+  // try {
+  //   if (!userId) return res.status(501).send({ error: 'Invalid Username' })
+
+  //   UserModel.findOne({ userId }, function (err, user) {
+  //     if (err) return res.status(500).send({ err })
+  //     if (!user)
+  //       return res.status(501).send({ error: "Couldn't Find the User" })
+
+  //     /** remove password from user */
+  //     // mongoose return unnecessary data with object so convert it into json
+  //     const { password, ...rest } = Object.assign({}, user.toJSON())
+
+  //     return res.status(201).send(rest)
+  //     console.log(rest)
+  //   })
+  // } catch (error) {
+  //   return res.status(404).send({ error: 'Cannot Find User Data' })
+  // }
+}
+
+exports.updateUser = async (req, res) => {
+  const userId = req.params
+  const { email, firstName, lastName, phoneNumber } = req.body
+  // if (!email || !name || !lastName || !location) {
+  //   throw new BadRequestError('Please provide all values')
+  // }
+  const user = await User.findOne(userId)
+
+  user.email = email
+  user.firstName = firstName
+  user.lastName = lastName
+  user.phoneNumber = phoneNumber
+
+  await user.save()
+
+  // const token = user.createJWT()
+  // attachCookie({ res, token })
+
+  // res.status(201).json(user)
+  const { password, ...rest } = Object.assign({}, user.toJSON())
+  return res.status(201).send(rest)
 }

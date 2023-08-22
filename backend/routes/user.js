@@ -6,6 +6,8 @@ const {
   forgetPassword,
   sendResetPasswordTokenStatus,
   resetPassword,
+  getProfileDetails,
+  updateUser,
 } = require('../controllers/user')
 const { isValidPassResetToken } = require('../middleware/user')
 const {
@@ -32,5 +34,8 @@ router.post(
   isValidPassResetToken,
   resetPassword
 )
+
+router.get('/profile', getProfileDetails)
+router.put('/updateUser', updateUser)
 
 module.exports = router
